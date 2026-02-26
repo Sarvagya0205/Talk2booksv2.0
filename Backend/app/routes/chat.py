@@ -9,5 +9,6 @@ class ChatRequest(BaseModel):
 
 @router.post("/")
 def chat(query:str):
-    result =rag_query(query)
-    return {"answer":result["answer"]}
+    # result =rag_query(query)
+    # return {"answer":result["answer"]}
+    return rag_query(query)
