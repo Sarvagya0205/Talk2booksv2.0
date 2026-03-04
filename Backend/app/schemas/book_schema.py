@@ -13,3 +13,12 @@ class BookUploadResponse(BaseModel):
     book_id:str
     total_chunks:int
     language:str
+
+class DeleteBookResponse(BaseModel):
+    message:str
+    book_id:str
+
+class BookResponse(BaseModel):
+    book_id:str
+    title:str
+    author:str
