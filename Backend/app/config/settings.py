@@ -6,7 +6,7 @@ load_dotenv()
 class Settings(BaseSettings):
     #database
     MONGO_URL:str
-    MONGO_DB_NAME:str="talk2books"
+    MONGO_DB_NAME:str
 
     QDRANT_URL:str="http://localhost:6333"
     QDRANT_API_KEY:str |None=None

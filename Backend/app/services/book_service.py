@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
-from app.db.mongo import db
+import uuid
+from app.db.mongo import books_collection
 from app.utils.text_processing import(
     extract_text_from_pdf,
     normalize_text,
@@ -13,8 +14,8 @@ from app.db.qdrant import client , create_collection , COLLECTION_NAME
 
 UPLOAD_DIR="uploads"
 os.makedirs(UPLOAD_DIR,exist_ok=True)
-
-async def save_books(title , author , file):
+# chunks_main=0
+async def save_books(title , author , file ,book_id:str):
     file_path=f"{UPLOAD_DIR}/{file.filename}"
     
     # saving here
@@ -32,8 +33,7 @@ async def save_books(title , author , file):
     
     # chunk building
     chunks = split_text_into_chunks(clean_text)
-    
-
+    chunks_main=chunks
     # generating embeddings 
     embeddings = generate_embeddings(chunks)
 
@@ -41,9 +41,10 @@ async def save_books(title , author , file):
 
     points=[
         PointStruct(
-            id=i,
+            id=str(uuid.uuid4()),
             vector=embeddings[i],
             payload={
+                "book_id":book_id,
                 "text":chunks[i],
                 "title":title,
                 "author":author
@@ -56,20 +57,21 @@ async def save_books(title , author , file):
         collection_name=COLLECTION_NAME,
         points=points
     )
-    # storing in mongoDB(local)
-    book={
-        "title":title,
-        "author":author,
-        "file_path":file_path,
-        "language":language,
-        "chunks":chunks,
-        "uploaded at":datetime.now(),
-    }
-
-    db.books.insert_one(book)
-    
     return{
         "message":"Book uploaded succcessfully",
         "language":language,
-        "total_chunks":len(chunks)
+        "total_chunks":len(chunks),
+        # "book_id":str(result.inserted_id)
     }
+
+async def save_metadata(title:str , author:str , file):
+    # storing in mongoDB(atlas)
+    book={
+        "title":title,
+        "author":author,
+        "filename":file.filename,
+        "uploaded at":datetime.now()
+    }
+
+    result=books_collection.insert_one(book)
+    return str(result.inserted_id)
