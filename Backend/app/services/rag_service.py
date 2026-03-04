@@ -33,8 +33,8 @@ prompt = PromptTemplate(
     input_variables=["context","question","text"]
 )
 #RAG pipline
-def rag_query(question:str):
-    results=search_books(question,top_k=5)
+def rag_query(question:str , book_id:str):
+    results=search_books(question,top_k=5,book_id=book_id)
     language=detect_lang(question)
     context = "\n\n".join([r["text"][:500]for r in results])
 
