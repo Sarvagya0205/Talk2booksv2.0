@@ -2,9 +2,7 @@ from qdrant_client import QdrantClient
 from qdrant_client.models import VectorParams,Distance
 from app.config.settings import get_settings
 settings=get_settings()
-client = QdrantClient(
-    # host="localhost",
-    # port=6333
+client = QdrantClient(                    
     url=settings.QDRANT_URL,
     api_key=settings.QDRANT_API_KEY
 )

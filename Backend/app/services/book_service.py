@@ -16,13 +16,8 @@ UPLOAD_DIR="uploads"
 os.makedirs(UPLOAD_DIR,exist_ok=True)
 
 
-async def save_books(title , author , file ,book_id:str):
-    file_path=f"{UPLOAD_DIR}/{file.filename}"
-    
-    # saving here
-    with open(file_path ,"wb")as f:
-        content = await file.read()
-        f.write(content)   
+async def save_books(title , author , file_path :str ,book_id:str):
+
     # extracting text
     raw_text = extract_text_from_pdf(file_path)
     
@@ -62,20 +57,30 @@ async def save_books(title , author , file ,book_id:str):
         "message":"Book uploaded succcessfully",
         "language":language,
         "total_chunks":len(chunks),
-        # "book_id":str(result.inserted_id)
     }
 
-async def save_metadata(title:str , author:str , file):
+async def save_metadata(title:str , author:str , filename):
     # storing in mongoDB(atlas)
     book={
         "title":title,
         "author":author,
-        "filename":file.filename,
+        "filename":filename,
         "uploaded at":datetime.now()
     }
 
     result=books_collection.insert_one(book)
     return str(result.inserted_id)
+
+async def save_upload_file(file):
+    original_name = os.path.basename(file.filename or "uploaded.pdf")
+    stored_name = f"{uuid.uuid4()}_{original_name}"
+    file_path = os.path.join(UPLOAD_DIR, stored_name)
+
+    with open(file_path, "wb") as f:
+        content = await file.read()
+        f.write(content)
+
+    return stored_name, file_path
 
 async def delete_book(book_id:str):
     # deleting metadata

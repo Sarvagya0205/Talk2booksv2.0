@@ -1,23 +1,24 @@
 from fastapi import APIRouter , UploadFile , File , Form
 from pymongo import MongoClient
 from app.schemas.book_schema import BookResponse,BookUploadResponse ,DeleteBookResponse
-from app.services.book_service import get_books,save_books ,save_metadata , delete_book
+from app.services.book_service import get_books,save_books ,save_metadata , delete_book ,save_upload_file
 from typing import List
 router = APIRouter()
 
-@router.post("/upload",response_model=BookUploadResponse)
+@router.post("/upload", response_model=BookUploadResponse)
 async def upload_book(
-    title:str=Form(),
-    author:str =Form(),
+    title: str = Form(),
+    author: str = Form(),
     file: UploadFile = File()
 ):
-    book_id=await save_metadata(title,author,file)
-    book_result= await save_books(title,author,file,book_id)
-    
+    stored_filename, file_path = await save_upload_file(file)
+    book_id = await save_metadata(title, author, stored_filename)
+    book_result = await save_books(title, author, file_path, book_id)
+
     return BookUploadResponse(
         message="book uploaded successfully",
         book_id=book_id,
-        total_chunks=book_result['total_chunks'],
+        total_chunks=book_result["total_chunks"],
         language=book_result["language"]
     )
     

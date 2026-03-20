@@ -1,0 +1,4 @@
+/* App-level styles — minimal, most design is in index.css and component CSS */
+#root {
+  min-height: 100vh;
+}
